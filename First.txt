@@ -1,3 +1,3 @@
-E:\gitsheetinaction\sheetinaction>git add First
+E:\gitsheetinaction\sheetinaction>git .
 E:\gitsheetinaction\sheetinaction>git commit -m "first commit"
 E:\gitsheetinaction\sheetinaction>git push -u origin master
