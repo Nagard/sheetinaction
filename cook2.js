@@ -27,12 +27,26 @@ var cornerRadius = 80;
 
 	};
 myImg.src = dataURL;
-  
-  
-  
-  
+ 
  // ctx.strokeText(text, 15, 50);
 }
+
+function escape (key, val) {
+    if (typeof(val)!="string") return val;
+    return val
+      .replace(/[\"]/g, '\\"')
+      .replace(/[\\]/g, '\\\\')
+      .replace(/[\/]/g, '\\/')
+      .replace(/[\b]/g, '\\b')
+      .replace(/[\f]/g, '\\f')
+      .replace(/[\n]/g, '\\n')
+      .replace(/[\r]/g, '\\r')
+      .replace(/[\t]/g, '\\t')
+    ; 
+}
+
+
+
  function loadCanvas(dataURL) {
         var canvas = document.getElementById('myCanvas');
         var context = canvas.getContext('2d');
