@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="favicon.ico">
+	<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+	<meta name="theme-color" content="#000000">
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
+
+	<style>
+		.checked {
+			background: green;
+			color: #fff;
+
+		}
+
+		.extchecked {
+			background: gray;
+			color: #fff;
+
+		}
+	</style>
+
+
+
+
+
+
+	<title>Google Menue</title>
+	<link href="static/css/main.ca1e60f4.chunk.css" rel="stylesheet">
+	<script>
+
+
+		// URL Parameter abholen
+		var params = new window.URLSearchParams(window.location.search);
+		var userName = params.get('username');
+
+		var gsheet = params.get('gsheet');
+
+		var quizTitel = params.get('titel');
+
+		var mwst = 19;
+
+
+		//ACHTUNG Indexkorrekturwert wegen erster Zeile = B
+		var korrektur = -1;
+
+		//storing array in localStorage
+		var state = [];
+		var busket = [];
+
+
+		//Todo prüfe die Sinnhaftigkeit dieser Belegung
+		var quantity = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+
+
+		// Zu testzwecken hier, sollte aktiv ausgewählt werden 
+		getStateDataById(userName);
+
+		var storedState = JSON.parse(localStorage.getItem("my_state"));
+
+		var masterState = "";
+
+		var masterStateBeforeUpate = "";
+		console.log("localstorage : " + storedState);
+
+		/*
+		function getDataByIdAndSetInputElements(id) {
+			console.log("in getDataByIdAndSetInputElements");
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4) {
+					console.log("after response getDataByIdAndSetInputElements");
+					var data = JSON.parse(xhr.responseText);
+					console.log("response " + xhr.responseText);
+					showContainer("updatecontainer");
+					document.getElementById('id').value = data.id;
+					document.getElementById('desc2').value = data.description;
+
+				}
+			};
+			//xhr.open('GET', 'jsondata.json');
+			xhr.open('GET', 'http://localhost:4000/courses/' + id);
+
+			xhr.send();
+		}
+
+*/
+		// id ist userName hier
+		function getStateDataById(id) {
+			console.log("in getStateDataById");
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4) {
+					console.log("after response getStateDataById");
+					var data = JSON.parse(xhr.responseText);
+					console.log("response from Google Sheet : " + xhr.responseText);
+
+					console.log("Google Sheet State : " + data.description);
+
+					localStorage.setItem("my_state", data.description);
+
+
+
+
+				}
+			};
+			//xhr.open('GET', 'jsondata.json');
+			xhr.open('GET', 'http://localhost:4000/states/' + id + "/" + gsheet);
+
+			xhr.send();
+		}
+
+
+		// id ist userName hier
+		function getMasterDataById(id, ev) {
+			console.log("in getStateDataById");
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4) {
+					console.log("after response getStateDataById");
+					var data = JSON.parse(xhr.responseText);
+
+
+					console.log("Master State : " + data.description);
+					masterStateBeforeUpate = data.description;
+
+					prepareUpdateAfterClick(ev);
+					summe(state);
+
+
+				}
+			};
+			//xhr.open('GET', 'jsondata.json');
+			xhr.open('GET', 'http://localhost:4000/states/' + id + "/" + gsheet);
+
+			xhr.send();
+		}
+
+
+
+/*
+		function update() {
+
+			console.log("in update()");
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4) {
+					console.log("updated");
+					//window.location.replace("index.html");
+					showContainer("listcontainer");
+					refresh();
+				}
+			};
+
+			//xhr.open('GET', 'jsondata.json');
+			//	xhr.open('POST', 'http://localhost:8080/instructors/haha/courses/'+id);
+
+			var myid = document.getElementById('id').value;
+			xhr.open("PUT", "http://localhost:4000/courses/update/" + myid);
+			xhr.setRequestHeader("Content-Type", "application/json");
+
+			var desc = document.getElementById('desc2').value;
+			xhr.send(JSON.stringify({
+				//"id" : myid,
+				//"username" : "telekom",
+				"updatecourse": desc
+			}));
+			//	xhr.send();
+
+		}
+
+*/		
+		
+		function updateState() {
+
+			console.log("in updateState()");
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4) {
+					console.log("updated State");
+					//window.location.replace("index.html");
+					//showContainer("listcontainer");
+					//refresh();
+				}
+			};
+
+			xhr.open("PUT", "http://localhost:4000/states/update/" + userName + "/" + gsheet);
+			xhr.setRequestHeader("Content-Type", "application/json");
+
+			var desc = JSON.stringify(state);
+			xhr.send(JSON.stringify({
+				//"id" : myid,
+				//"username" : "telekom",
+				"updateState": desc
+			}));
+			//	xhr.send();
+
+		}
+
+
+/*
+		function showContainer(container) {
+			console.log("show " + container);
+			document.getElementById("listcontainer").style.display = "none";
+			document.getElementById("addcontainer").style.display = "none";
+			document.getElementById("updatecontainer").style.display = "none";
+			document.getElementById(container).style.display = "block";
+		}
+
+*/
+
+/*
+		function postRequest(url, data) {
+			return fetch(url, {
+				credentials: 'include', // 'include', default: 'omit'
+				method: 'POST', // 'GET', 'PUT', 'DELETE', etc.
+				body: JSON.stringify(data), // Coordinate the body type with 'Content-Type'
+				headers: new Headers({
+					'Content-Type': 'application/json'
+				}),
+			})
+				.then(response => response.json())
+		}
+
+*/
+
+/*
+		function add() {
+			var desc = document.getElementById('desc').value;
+			postRequest('http://localhost:4000/courses', { newcourse: desc })
+				.then(data => console.log(data)) // Result from the `response.json()` call
+				.catch(error => console.error(error))
+
+			console.log("added");
+			//window.location.replace("index.html");
+			showContainer("listcontainer");
+			refresh();
+
+
+		}
+
+*/		
+		
+		
+		function refresh() {
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4) {
+					var data = JSON.parse(xhr.responseText);
+
+
+					state.length = data.length;
+					state = Array(data.length).fill(0);
+					//storedState ist localStorage Data
+					if (storedState != null) {
+						state = storedState;
+
+					}
+
+					console.log("STATE " + state);
+					//Produkttabelle aufbereiten 
+
+					zeilenAufbereiten(data);
+
+
+
+
+					//NEU
+
+					// Add a "checked" symbol when clicking on a row
+					//https://stackoverflow.com/questions/46165828/how-to-remember-current-toggle-state-in-this-example-after-page-refresh-with-loc
+					var listAll = document.querySelectorAll('tbody');
+					console.log(listAll);
+					document.getElementById("quizTitel").innerText = quizTitel;
+					document.getElementById("userName").innerText = userName;
+					console.log("listAll.length " + listAll.length);
+					for (i = 0; i < listAll.length; i++) {
+
+						listAll[i].addEventListener('click', function (ev) {
+							//console.log(ev.target.tagName);
+
+							//ACHTUNG Master lesen, wegen racecondition. 
+							getMasterDataById("Belegung", ev);
+
+
+							/* if (1==2 && (ev.target.tagName === 'TD') && (ev.target.parentElement.className != "leer")   && (ev.target.parentElement.className != "extchecked")  ) {
+								//switch to parent TR
+	
+								console.log("ZEILE GEKLICKT : " + ev.target.parentElement.id);
+	
+								//TODO nicht toggle
+								ev.target.parentElement.classList.toggle('checked');
+	
+	
+								console.log("before state " + state);
+								console.log("clicked row " + ev.target.parentElement.id);
+	
+								//if (state[ev.target.parentElement.id-1]==0|| state[ev.target.parentElement.id-1]==null){
+								if (state[ev.target.parentElement.id - 1] <3 || state[ev.target.parentElement.id - 1] == null) {
+									console.log("bin in 0");
+									console.log(ev.target.parentElement.id);
+									var quantplus = state[ev.target.parentElement.id - 1];
+									state[ev.target.parentElement.id - 1] = quantplus + 1;
+									quantity[ev.target.parentElement.id - 1] = quantplus + 1
+									document.getElementById("q" + (ev.target.parentElement.id - 1)).innerText = quantplus + 1
+									console.log("haha1 " + state);
+								}
+								if (state[ev.target.parentElement.id - 1] == 2) {
+									console.log("bin in 1");
+									console.log(ev.target.parentElement.id);
+	
+									state[ev.target.parentElement.id - 1] = 0;
+									quantity[ev.target.parentElement.id - 1] = 0;
+									document.getElementById("q" + (ev.target.parentElement.id - 1)).innerText = 0;
+									console.log("haha2 " + state);
+								}
+	
+	
+	
+	
+								// 	for (i = 0; i < state.length+korrektur; i++) {
+								for (i = 0; i < state.length+korrektur; i++) {
+	
+									if (document.getElementById("" + (i + 1))!=null){
+									
+									
+										if (document.getElementById("" + (i + 1)).className != "leer") {
+											if (state[i] > 0) {
+												console.log("ACTIVE CELL " + i);
+												document.getElementById("" + (i + 1)).className = "checked";
+											}
+											else {
+											
+												//wenn aktuelle Position bereits extern belegt wurde, dann darf sie hier nicht clickbar sein.
+												if (masterState[i] > 0) {
+													console.log("****************   EXT ACTIVE CELL " + i);
+													//document.getElementById("" + (i + 1)).className = "extchecked";
+												}
+												else{
+													console.log("INACTIVE CELL " + i);
+													document.getElementById("" + (i + 1)).className = "xxxx";
+												}
+											
+											}
+	
+										}
+										
+										
+										
+										
+										
+										}
+										
+																
+									
+								}
+	
+	
+	
+								console.log("after state " + state);
+								localStorage.setItem("my_state", JSON.stringify(state));
+								updateState();
+							}
+							
+							*/
+
+
+							// summe(state);
+
+
+						}, false);
+
+						//HIER 
+
+					}
+
+					//Ende listener
+
+
+
+
+					summe(state);
+
+				}
+			};
+
+			//xhr.open('GET', 'jsondata.json');
+			xhr.open('GET', 'http://localhost:4000/courses');
+
+			xhr.send();
+		}
+
+
+		function prepareUpdateAfterClick(ev) {
+
+			console.log("ZEILE GEKLICKT : " + ev.target.parentElement.id - 1);
+			console.log("masterState: " + masterStateBeforeUpate);
+			console.log("state: " + state);
+			var extValue = masterStateBeforeUpate[ev.target.parentElement.id - 1];
+			var locValue = state[ev.target.parentElement.id - 1]
+			var action = true;
+			if (extValue == 1 && locValue == 1) {
+				console.log("Löschen möglich   extvalue: " + extValue + " / locvalue: " + locValue);
+			}
+			if (extValue == 1 && locValue == 0) {
+				action = false;
+				console.log("Setzen nicht möglich extvalue: " + extValue + " / locvalue: " + locValue);
+				document.getElementById("" + (ev.target.parentElement.id)).className = "extchecked";
+			}
+			if (extValue == 0 && locValue == 0) {
+				console.log("Setzen möglich extvalue: " + extValue + " / locvalue: " + locValue);
+			}
+			if (extValue == 0 && locValue == 1) {
+				console.log("Löschen möglich extvalue: " + extValue + " / locvalue: " + locValue);
+			}
+
+
+			if (action && (ev.target.tagName === 'TD') && (ev.target.parentElement.className != "leer") && (ev.target.parentElement.className != "extchecked")) {
+				//switch to parent TR
+
+
+
+				//TODO nicht toggle
+				ev.target.parentElement.classList.toggle('checked');
+
+				console.log("master State " + masterState);
+				console.log("before state " + state);
+				console.log("clicked row " + ev.target.parentElement.id);
+
+				//if (state[ev.target.parentElement.id-1]==0|| state[ev.target.parentElement.id-1]==null){
+				if (state[ev.target.parentElement.id - 1] < 3 || state[ev.target.parentElement.id - 1] == null) {
+					console.log("bin in 0");
+					console.log(ev.target.parentElement.id);
+					var quantplus = state[ev.target.parentElement.id - 1];
+					state[ev.target.parentElement.id - 1] = quantplus + 1;
+					quantity[ev.target.parentElement.id - 1] = quantplus + 1
+					document.getElementById("q" + (ev.target.parentElement.id - 1)).innerText = quantplus + 1
+					console.log("haha1 " + state);
+				}
+				if (state[ev.target.parentElement.id - 1] == 2) {
+					console.log("bin in 1");
+					console.log(ev.target.parentElement.id);
+
+					state[ev.target.parentElement.id - 1] = 0;
+					quantity[ev.target.parentElement.id - 1] = 0;
+					document.getElementById("q" + (ev.target.parentElement.id - 1)).innerText = 0;
+					console.log("haha2 " + state);
+				}
+
+
+
+
+				// 	for (i = 0; i < state.length+korrektur; i++) {
+				for (i = 0; i < state.length + korrektur; i++) {
+
+					if (document.getElementById("" + (i + 1)) != null) {
+
+
+						if (document.getElementById("" + (i + 1)).className != "leer") {
+							if (state[i] > 0) {
+								console.log("ACTIVE CELL " + i);
+								document.getElementById("" + (i + 1)).className = "checked";
+							}
+							else {
+
+								//wenn aktuelle Position bereits extern belegt wurde, dann darf sie hier nicht clickbar sein.
+								if (masterState[i] > 0) {
+									console.log("****************   EXT ACTIVE CELL " + i);
+									//document.getElementById("" + (i + 1)).className = "extchecked";
+								}
+								else {
+									console.log("INACTIVE CELL " + i);
+									document.getElementById("" + (i + 1)).className = "xxxx";
+								}
+
+							}
+
+						}
+
+
+
+
+
+					}
+
+
+
+				}
+
+
+
+				console.log("after state " + state);
+				localStorage.setItem("my_state", JSON.stringify(state));
+				updateState();
+			}
+
+
+		}
+
+
+
+		function zeilenAufbereiten(datenX) {
+
+
+			//addCard("Nudelgericht",2);
+			//addCard("Getränke",3);
+
+
+			console.log("state length :"+state.length);
+			console.log("datenX length :"+datenX.length);
+			console.log("busket length :"+busket.length);
+		
+			
+			
+			var kategorieNummer = 0;
+
+			var dataHTML = '';
+			for (var i = 0; i < datenX.length; i++) {
+				var classText = '';
+				console.log(datenX[i].id);
+				if (datenX[i].id == "K") {
+					// 4
+					//schnell die letzten Daten ablegen, bevor neue Kategorie entsteht  
+					if (kategorieNummer > 0) {
+						document.getElementById('pdata' + kategorieNummer).innerHTML = dataHTML;
+					}
+					addCard(datenX[i].description, ++kategorieNummer);
+
+					dataHTML = '';
+
+					continue;
+				}
+
+
+				if (datenX[i].id == "B") {
+					// 4
+					console.log("LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLl   Aktuelle Gesamtbelegung : " + datenX[i].description);
+					masterState = JSON.parse(datenX[i].description);
+
+					continue;
+				}
+
+
+				if (datenX[i].id == "F") {
+
+					dataHTML += '<tr id='
+						+ "" + (i + 1) + ' class="leer"><td>'
+						+ ""
+						+ '</td><td><h4>'
+						+ datenX[i].description
+						+ '</h4></td></tr>'
+					continue;
+				}
+
+				if (datenX[i].id == "I") {
+					console.log("bin in nicht A");
+					dataHTML += '<tr id='
+						+ "" + (i + 1) + ' class="leer"><td>'
+						+ ""
+						+ '</td><td> <img src="'
+						+ datenX[i].description
+						+ '" height="200"/></td></tr>'
+				}
+				if (datenX[i].id == "A") {
+					console.log("bin in  A");
+					var temp = JSON.parse(datenX[i].description);
+					busket[i] = temp;
+					dataHTML += '<tr id='
+						+ "" + (i + 1) +
+						' class="xxxx"><td>'
+						+ ""
+						+ '</td><td>'
+						+ temp.titel + ' ' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(temp.preis) + ' Menge : <span id="q' + (i) + '">' + state[i] + '</div>'
+						+ '</td></tr>'
+
+				}
+
+				//falls Ende, dann schnell noch Daten ablegen.
+				if ((i + 1) == datenX.length) {
+					document.getElementById('pdata' + kategorieNummer).innerHTML = dataHTML;
+				}
+
+
+			}
+
+			//3 
+			// document.getElementById('pdata1').innerHTML = dataHTML;
+
+			for (i = 0; i < state.length; i++) {
+
+				//Prüfung auf null, da nicht alle Positionen in state Sinn als id verwendet wurden
+				if (document.getElementById("" + (i + 1)) != null) {
+
+					console.log("document.getElementById(+(i+1)).className.value " + document.getElementById("" + (i + 1)).className);
+					if (document.getElementById("" + (i + 1)).className != "leer") {
+						console.log("Clickzone");
+						if (state[i] > 0) {
+							document.getElementById("" + (i + 1)).className = "checked";
+						}
+						else {
+
+
+							//document.getElementById("" + (i + 1)).className = "xxxx";
+
+							if (masterState[i] > 0) {
+								console.log("HAHA ---------------------------------------EXT ACTIVE CELL " + i);
+								document.getElementById("" + (i + 1)).className = "extchecked";
+							}
+							else {
+								console.log("INACTIVE CELL " + i);
+								document.getElementById("" + (i + 1)).className = "xxxx";
+							}
+
+
+
+
+
+						}
+
+					}
+
+				}
+
+
+
+			}
+
+
+
+
+
+		}
+
+
+
+
+
+
+
+		function summe(mengen) {
+
+			var gesamt = 0;
+			console.log("Quantity Size :" + mengen.length);
+			console.log(busket);
+			console.log("busket length :"+busket.length);
+			
+			console.log(mengen);
+			
+			var dataHTML = '<tr id='
+				+ "g" + (0) + ' class="leer"><td>'
+				+ ""
+				+ '</td><td><h6>'
+				+ 'Aktueller Warenkorb:'
+				+ '</h6></td></tr>';
+
+			for (i = 0; i < mengen.length; i++) {
+
+				//Prüfung auf undefined, da nicht alle Positionen in menge Sinn machen
+				if (busket[i] != undefined && (mengen[i] * 1) > 0) {
+					quantity[i] = 1;
+					console.log(busket[i].preis * 1);
+					gesamt = gesamt + (busket[i].preis * 1) * mengen[i];
+					dataHTML += '<tr id='
+						+ "g" + (i + 1) + ' class="leer"><td>'
+						+ ""
+						+ '</td><td>'
+						+ busket[i].haupttitel + " " + busket[i].titel + "<br> " + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(busket[i].preis) + ' Euro x  ' + mengen[i] + " = " + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format((busket[i].preis * 1) * mengen[i])
+						+ '<br><br></td></tr>'
+				}
+
+
+			}
+
+
+			dataHTML += '<tr id='
+				+ "ggesamt0" + ' class="leer"><td>'
+				+ ""
+				+ '</td><td><h6>'
+				+ '_______________________________________________'
+				+ '</h6></td></tr>';
+
+
+			dataHTML += '<tr id='
+				+ "ggesamt1" + ' class="leer"><td>'
+				+ ""
+				+ '</td><td><h6>'
+				+ 'Nettopreis : ' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamt)
+				+ '</h6></td></tr>'
+
+
+			dataHTML += '<tr id='
+				+ "ggesamt2" + ' class="leer"><td>'
+				+ ""
+				+ '</td><td><h6>'
+				+ 'Mwst : ' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamt * (mwst / 100))
+				+ '</h6></td></tr>'
+
+			dataHTML += '<tr id='
+				+ "ggesamt3" + ' class="leer"><td>'
+				+ ""
+				+ '</td><td><h6>'
+				+ 'Bruttopreis : ' + new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(gesamt * (1 + mwst / 100))
+				+ '</h6></td></tr>'
+
+
+			document.getElementById('wdata').innerHTML = dataHTML;
+			console.log("Gesamtpreis : " + gesamt);
+
+
+		}
+
+/*
+		function del(id) {
+			console.log("Eintritt in del(id) " + id);
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function () {
+				if (xhr.readyState === 4) {
+					console.log("delete " + id);
+					refresh();
+				}
+			};
+
+			//xhr.open('GET', 'jsondata.json');
+			xhr.open('POST', 'http://localhost:4000/courses/delete/'
+				+ id);
+
+			xhr.send();
+
+		}
+
+*/
+
+/*		
+		function showupdatecontainer(id) {
+
+			console.log("update " + id);
+			//window.location.replace("update.html?id="+id);
+			//	showContainer("updatecontainer");
+			getDataByIdAndSetInputElements(id);
+		}
+
+*/		
+		
+		refresh();
+
+
+
+
+
+
+	</script>
+
+</head>
+
+<body>
+
+	<noscript>You need to enable JavaScript to run this app.</noscript>
+
+
+	<div id="root">
+		<div class="container">
+			<!-- <h1>Quiz</h1>-->
+
+
+
+			<div id="listcontainer" class="container">
+				<h3 align="center" id="quizTitel"><script >document.write("Geschenkeliste")</script></h3>
+				<h3 align="center" id="userName"><script >document.write(userName)</script></h3>
+
+
+				<div class="container">
+
+
+
+					<div id="accordion">
+
+
+						<div class="card">
+							<div class="card-header" id="headingTwo">
+								<h5 class="mb-0">
+									<button class="btn btn-link collapsed" data-toggle="collapse"
+										data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+										<img width="40" src="https://image.flaticon.com/icons/png/128/34/34581.png">
+										&nbsp;Das möchtest Du schenken <script >document.write(userName)</script>
+									</button>
+								</h5>
+							</div>
+							<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo"
+								data-parent="#accordion">
+								<div class="card-body">
+
+
+									<table class="table">
+										<thead>
+											<tr>
+												<!-- 
+								<th>Id</th>
+								<th>Description</th>
+								<th>Update</th>
+								<th>Delete</th> -->
+											</tr>
+										</thead>
+										<article id="wdata">
+
+										</article>
+									</table>
+
+
+								</div>
+							</div>
+						</div>
+
+
+					</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+				</div>
+			</div>
+
+
+
+
+
+
+
+
+
+		</div>
+	</div>
+
+
+
+</body>
+
+
+<script>
+
+	function addCard(rowdata, cardNr) {
+		var temp = JSON.parse(rowdata);
+		var card = `
+						<div class="card">
+								<div class="card-header" id="heading${cardNr}">
+								  <h5 class="mb-0">
+									<button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse${cardNr}" aria-expanded="false" aria-controls="collapse${cardNr}">
+									 <img width="80" src="${temp.icon}">  ${temp.titel} 
+									</button>
+								  </h5>
+								</div>
+								<div id="collapse${cardNr}" class="collapse" aria-labelledby="heading${cardNr}" data-parent="#accordion">
+								  <div class="card-body">
+										
+										<table class="table">
+										<thead>
+											<tr>
+												<!-- 
+								<th>Id</th>
+								<th>Description</th>
+								<th>Update</th>
+								<th>Delete</th> -->
+											</tr>
+										</thead>
+										<tbody id="pdata${cardNr}">
+
+										</tbody>
+									</table>
+								  </div>
+								</div>
+							</div>
+`
+
+		document.getElementById('accordion').innerHTML = document.getElementById('accordion').innerHTML + card;
+	}
+
+
+
+</script>
+
+
+
+</html>
