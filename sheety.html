@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+
+<meta name="viewport"
+	content="width=device-width,initial-scale=1,shrink-to-fit=no">
+<meta name="theme-color" content="#000000">
+
+<title>My Full Stack Application with Spring Boot and React</title>
+<link href="main.ca1e60f4.chunk.css" rel="stylesheet">
+<script>
+
+    var sheetyURL= 'https://api.sheety.co/1686bb5449dd0d6870a494cdacadec55/coursesApp/sheet1/';
+
+	function getDataByIdAndSetInputElements(id) {
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				var data = JSON.parse(xhr.responseText).sheet1;
+                console.log(data); 
+				document.getElementById('id').value = data.id;
+				document.getElementById('extra2').value = data.extra;
+				document.getElementById('desc2').value = data.description;
+				
+			}
+		};
+
+		//xhr.open('GET', 'jsondata.json');
+	//	xhr.open('GET', 'http://localhost:8080/instructors/haha/courses/' + id);
+		xhr.open('GET', sheetyURL + id);
+		xhr.send();
+	}
+
+	function update() {
+
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				console.log("updated");
+				//window.location.replace("index.html");
+				showContainer("listcontainer");
+				refresh();
+			}
+		};
+
+		//xhr.open('GET', 'jsondata.json');
+		//	xhr.open('POST', 'http://localhost:8080/instructors/haha/courses/'+id);
+
+		var myid = document.getElementById('id').value;
+	//	xhr.open("PUT", "http://localhost:8080/instructors/haha/courses/"
+		//		+ myid);
+			xhr.open("PUT", sheetyURL + myid);		
+				
+				
+		xhr.setRequestHeader("Content-Type", "application/json");
+
+		var desc = document.getElementById('desc2').value;
+		var extra = document.getElementById('extra2').value;
+		xhr.send(JSON.stringify( {sheet1: {
+			"id" : myid,
+			"username" : "telekom",
+			"extra" : extra,
+			"description" : desc
+		}}));
+		//	xhr.send();
+
+	}
+
+	function showContainer(container) {
+		console.log("show " + container);
+		document.getElementById("listcontainer").style.display = "none";
+		document.getElementById("addcontainer").style.display = "none";
+		document.getElementById("updatecontainer").style.display = "none";
+		document.getElementById(container).style.display = "block";
+	}
+
+	function add() {
+
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				console.log("added");
+				//window.location.replace("index.html");
+				showContainer("listcontainer");
+				refresh();
+
+			}
+		};
+
+		//xhr.open('GET', 'jsondata.json');
+		//	xhr.open('POST', 'http://localhost:8080/instructors/haha/courses/'+id);
+
+//		xhr.open("POST", "http://localhost:8080/instructors/haha/courses/");
+			xhr.open("POST", sheetyURL);
+		xhr.setRequestHeader("Content-Type", "application/json");
+		var desc = document.getElementById('desc').value;
+		var extra = document.getElementById('extra').value;
+		xhr.send(JSON.stringify({sheet1:{
+			"id" : -1,
+			"username" : "telekom",
+			"extra" : extra,
+			"description" : desc
+		}}));
+		//	xhr.send();
+
+	}
+	function refresh() {
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				var data = JSON.parse(xhr.responseText).sheet1;
+				console.log(data);
+				var dataHTML = '';
+				for (var i = 0; i < data.length; i++) {
+					var classText = '';
+					dataHTML += '<tr><td>'
+							+ data[i].id
+							+ '</td><td>'
+							+ data[i].extra
+							+ '</td><td>'
+							+ data[i].description
+							+ '</td><td><button  onclick="showupdatecontainer('
+							+ data[i].id
+							+ ');"    class="btn btn-success">Update</button></td><td><button onclick="del('
+							+ data[i].id
+							+ ');" class="btn btn-warning">Delete</button></td></tr>'
+
+				}
+
+				document.getElementById('data').innerHTML = dataHTML;
+			}
+		};
+
+		//xhr.open('GET', 'jsondata.json');
+	//	xhr.open('GET', 'http://localhost:8080/instructors/haha/courses');
+		xhr.open('GET', sheetyURL);
+
+		xhr.send();
+	}
+	function del(id) {
+
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState === 4) {
+				console.log("delete " + id);
+				refresh();
+			}
+		};
+
+		//xhr.open('GET', 'jsondata.json');
+//		xhr.open('DELETE', 'http://localhost:8080/instructors/haha/courses/'+ id);
+xhr.open('DELETE', sheetyURL 	+ id);
+				
+		xhr.send();
+
+	}
+
+	function showupdatecontainer(id) {
+
+		console.log("update " + id);
+		//window.location.replace("update.html?id="+id);
+		showContainer("updatecontainer");
+		getDataByIdAndSetInputElements(id);
+	}
+
+	refresh();
+</script>
+
+</head>
+
+<body>
+	<noscript>You need to enable JavaScript to run this app.</noscript>
+
+
+	<div id="root">
+		<div class="container">
+			<h1>Instructor Application</h1>
+
+
+
+			<div id="listcontainer" class="container">
+				<h3>All Courses</h3>
+				<div class="container">
+					<table class="table">
+						<thead>
+							<tr>
+								<th>Id</th>
+								<th>Extra</th>
+								<th>Description</th>
+								<th>Update</th>
+								<th>Delete</th>
+							</tr>
+						</thead>
+						<tbody id="data">
+
+						</tbody>
+					</table>
+					<div class="row">
+						<button onclick="showContainer('addcontainer')"
+							class="btn btn-success">Add</button>
+					</div>
+				</div>
+			</div>
+
+
+
+
+			<div id="addcontainer" style="display: none" class="container">
+				<h3>Add Course</h3>
+				<div class="container">
+					<form>
+						<fieldset class="form-group">
+							<label>Id</label><input name="id" disabled=""
+								class="form-control" type="text" value="-1">
+						</fieldset>
+						<fieldset class="form-group">
+							<label>Extra</label><input id="extra" name="extra"
+								class="form-control" type="text" value="">
+						</fieldset>
+						
+						
+						<fieldset class="form-group">
+							<label>Description</label><input id="desc" name="description"
+								class="form-control" type="text" value="">
+						</fieldset>
+						<button onclick="add()" class="btn btn-success" type="button">Save</button>
+					</form>
+				</div>
+			</div>
+
+
+
+			<div id="updatecontainer" style="display: none" class="container">
+				<h3>Update Course</h3>
+				<div class="container">
+					<form>
+						<fieldset class="form-group">
+							<label>Id</label><input id="id" name="id" disabled=""
+								class="form-control" type="text" value="-1">
+						</fieldset>
+						<fieldset class="form-group">
+							<label>Extra</label><input id="extra2" name="extra"
+								class="form-control" type="text" value="">
+						</fieldset>
+						<fieldset class="form-group">
+							<label>Description</label><input id="desc2" name="description"
+								class="form-control" type="text" value="">
+						</fieldset>
+
+						<button onclick="update()" class="btn btn-success" type="button">Save</button>
+					</form>
+				</div>
+			</div>
+
+
+
+
+
+		</div>
+	</div>
+</body>
+
+</html>
